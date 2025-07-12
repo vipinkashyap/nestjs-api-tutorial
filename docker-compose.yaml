@@ -1,0 +1,16 @@
+services:
+  nestjs-api-db:
+    image: postgres:latest
+    container_name: nestjs-api-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1233
+      POSTGRES_DB: nestjs_api_db
+    networks:
+      - nestjs-api-network
+    ports:
+      - "5432:5432"
+
+networks:
+  nestjs-api-network:
+    driver: bridge
