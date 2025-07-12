@@ -19,12 +19,20 @@ model User {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  email String
+  email String @unique
   hash String
   firstName String?
   lastName String?
+
+  @@map("users")
+
+  // Relation to Bookmarks
+  bookmarks Bookmark[]
 }
 
+// Many bookmarks can be saved by one user
+// One user can have many bookmarks
+// This is a one-to-many relationship
 model Bookmark{
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -32,4 +40,10 @@ model Bookmark{
   title String
   description String?
   link String
+
+  @@map("bookmarks")
+
+  // Relation to User
+  userId Int
+  user User @relation(fields: [userId], references: [id])
 }

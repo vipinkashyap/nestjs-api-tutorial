@@ -11,18 +11,11 @@ export class AuthController {
   /// Response: { message: string, userId: string }
   @Post('signup')
   signup(@Body() dto: AuthDto) {
-    // Lot of props here
-    console.log({
-      email: dto.email,
-      password: dto.password,
-      typeOfEmail: typeof dto.email,
-      typeOfPassword: typeof dto.password,
-    });
-    this.authService.signup();
+    this.authService.signup(dto);
   }
 
   @Post('signin')
-  signin() {
-    this.authService.signin();
+  signin(@Body() dto: AuthDto) {
+    this.authService.signin(dto);
   }
 }
