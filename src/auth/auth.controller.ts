@@ -11,11 +11,11 @@ export class AuthController {
   /// Response: { message: string, userId: string }
   @Post('signup')
   signup(@Body() dto: AuthDto) {
-    this.authService.signup(dto);
+    return this.authService.signup(dto);
   }
 
   @Post('signin')
   signin(@Body() dto: AuthDto) {
-    this.authService.signin(dto);
+    return this.authService.signin(dto);
   }
 }
