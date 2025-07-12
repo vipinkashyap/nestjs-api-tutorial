@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, ParseIntPipe, Post, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
 
@@ -12,7 +12,12 @@ export class AuthController {
   @Post('signup')
   signup(@Body() dto: AuthDto) {
     // Lot of props here
-    console.log({ dto: dto });
+    console.log({
+      email: dto.email,
+      password: dto.password,
+      typeOfEmail: typeof dto.email,
+      typeOfPassword: typeof dto.password,
+    });
     this.authService.signup();
   }
 
