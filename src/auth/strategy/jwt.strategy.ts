@@ -13,6 +13,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    return { userId: payload.sub, email: payload.email }; // Return the user object with userId and email
+    console.log('JWT payload validate:', payload);
+    // Here you can add additional validation logic if needed
+    // For example, you can check if the user exists in the database
+    return payload;
+    // return { userId: payload.sub, email: payload.email }; // Return the user object with userId and email
   }
 }
