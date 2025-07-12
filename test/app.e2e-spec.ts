@@ -3,7 +3,8 @@ import { AppModule } from '../src/app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as pactum from 'pactum';
-import { AuthDto } from 'src/auth/dto';
+import { AuthDto, EditUserDto } from 'src/auth/dto';
+import { CreateBookmarkDto } from 'src/bookmark/dto';
 
 describe('App e2e tests', () => {
   let app: INestApplication;
@@ -123,7 +124,8 @@ describe('App e2e tests', () => {
           .spec()
           .post('/auth/signin')
           .withJson(dto)
-          .expectStatus(200);
+          .expectStatus(200)
+          .stores('userAt', 'access_token'); // Store the access token for later use
       });
 
       it('should return the current user', async () => {
@@ -135,20 +137,60 @@ describe('App e2e tests', () => {
 
 /// Bookmark Module tests
 describe('Bookmark Module', () => {
+  /// Get Empty Bookmarks
+  it('should get empty bookmarks', () => {
+    return pactum
+      .spec()
+      .get('/bookmarks')
+      .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+      .expectStatus(200)
+      .inspect()
+      .expectJson([]);
+  });
+
   it('should create a bookmark', async () => {
-    // Implement your test logic here
+    const dto: CreateBookmarkDto = {
+      title: 'Test Bookmark',
+      link: 'https://example.com',
+    };
+    return pactum
+      .spec()
+      .post('/bookmarks')
+      .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+      .withJson(dto)
+      .expectStatus(201);
   });
 
   it('should get all bookmarks', async () => {
     // Implement your test logic here
+    return pactum
+      .spec()
+      .get('/bookmarks')
+      .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+      .expectStatus(200);
   });
 
   it('should update a bookmark', async () => {
     // Implement your test logic here
+    const dto: CreateBookmarkDto = {
+      title: 'Updated Bookmark',
+      link: 'https://updated-example.com',
+    };
+    return pactum
+      .spec()
+      .patch('/bookmarks/1') // Assuming the bookmark ID is 1
+      .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+      .withJson(dto)
+      .expectStatus(200);
   });
 
   it('should delete a bookmark', async () => {
     // Implement your test logic here
+    return pactum
+      .spec()
+      .delete('/bookmarks/1') // Assuming the bookmark ID is 1
+      .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+      .expectStatus(204);
   });
 });
 
@@ -158,5 +200,50 @@ describe('User Module', () => {
     // Implement your test logic here
     // You can use supertest to make a GET request to the /users/me endpoint
     // and check if the response contains the expected user data.
+    // Describe GET /users/me endpoint
+    describe('GET /users/me', () => {
+      it('should return the current user', () => {
+        return pactum
+          .spec()
+          .get('/users/me')
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .expectStatus(200);
+      });
+      it('should return 401 if not authenticated', () => {
+        return pactum.spec().get('/users/me').expectStatus(401);
+      });
+    });
+
+    /// Describe PATCH /users/edit endpoint
+    describe('PATCH /users/edit', () => {
+      it('should edit the user', () => {
+        const dto: EditUserDto = {
+          email: 'new-email@example.com',
+          firstName: 'New Name',
+        };
+
+        return pactum
+          .spec()
+          .patch('/users/edit')
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .withBody(dto)
+          .expectStatus(200);
+      });
+      it('should return 401 if not authenticated', () => {
+        return pactum.spec().patch('/users/edit').expectStatus(401);
+      });
+
+      it('should throw if email is empty', () => {
+        return pactum
+          .spec()
+          .patch('/users/edit')
+          .withHeaders({ Authorization: 'Bearer $S{userAt}' })
+          .withBody({
+            email: '',
+            firstName: 'New Name',
+          })
+          .expectStatus(400);
+      });
+    });
   });
 });
